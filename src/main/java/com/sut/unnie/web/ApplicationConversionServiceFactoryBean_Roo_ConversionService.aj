@@ -3,6 +3,7 @@
 
 package com.sut.unnie.web;
 
+import com.sut.unnie.domain.Kak;
 import com.sut.unnie.domain.Salt;
 import com.sut.unnie.web.ApplicationConversionServiceFactoryBean;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -12,6 +13,30 @@ import org.springframework.format.FormatterRegistry;
 privileged aspect ApplicationConversionServiceFactoryBean_Roo_ConversionService {
     
     declare @type: ApplicationConversionServiceFactoryBean: @Configurable;
+    
+    public Converter<Kak, String> ApplicationConversionServiceFactoryBean.getKakToStringConverter() {
+        return new org.springframework.core.convert.converter.Converter<com.sut.unnie.domain.Kak, java.lang.String>() {
+            public String convert(Kak kak) {
+                return "(no displayable fields)";
+            }
+        };
+    }
+    
+    public Converter<Long, Kak> ApplicationConversionServiceFactoryBean.getIdToKakConverter() {
+        return new org.springframework.core.convert.converter.Converter<java.lang.Long, com.sut.unnie.domain.Kak>() {
+            public com.sut.unnie.domain.Kak convert(java.lang.Long id) {
+                return Kak.findKak(id);
+            }
+        };
+    }
+    
+    public Converter<String, Kak> ApplicationConversionServiceFactoryBean.getStringToKakConverter() {
+        return new org.springframework.core.convert.converter.Converter<java.lang.String, com.sut.unnie.domain.Kak>() {
+            public com.sut.unnie.domain.Kak convert(String id) {
+                return getObject().convert(getObject().convert(id, Long.class), Kak.class);
+            }
+        };
+    }
     
     public Converter<Salt, String> ApplicationConversionServiceFactoryBean.getSaltToStringConverter() {
         return new org.springframework.core.convert.converter.Converter<com.sut.unnie.domain.Salt, java.lang.String>() {
@@ -38,6 +63,9 @@ privileged aspect ApplicationConversionServiceFactoryBean_Roo_ConversionService 
     }
     
     public void ApplicationConversionServiceFactoryBean.installLabelConverters(FormatterRegistry registry) {
+        registry.addConverter(getKakToStringConverter());
+        registry.addConverter(getIdToKakConverter());
+        registry.addConverter(getStringToKakConverter());
         registry.addConverter(getSaltToStringConverter());
         registry.addConverter(getIdToSaltConverter());
         registry.addConverter(getStringToSaltConverter());
